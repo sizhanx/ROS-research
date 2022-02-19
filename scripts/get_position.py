@@ -4,7 +4,7 @@ import rospy
 from nav_msgs.msg import Odometry
 import xml.etree.ElementTree as ET
 from enum import Enum
-import re
+import random
 
 num = 0
 
@@ -18,7 +18,7 @@ the_map = []
 for i in range(0, 30):
   this_row = []
   for i in range(0,64):
-    this_row.append(0)
+    this_row.append(map_state.AVAIL)
   the_map.append(this_row)
 
 def aroud_obs():
@@ -35,7 +35,7 @@ def listener():
 
   rospy.spin()
 
-def main():
+def get_end_point():
   global the_map
   tree = ET.parse("/home/never0lie/research/22spring/robot/BARN_dataset/world_files/world_0.world")
   root = tree.getroot()
@@ -51,16 +51,24 @@ def main():
   # print(len(obs_poses))
   obs_poses = map(lambda x: [float(x[0]), float(x[1])],obs_poses)
   obs_index_poses = list(map(lambda x: [round((-x[0] - 0.075) / 0.15), round((x[1] - 0.075) / 0.15)], obs_poses))
-  print(obs_index_poses)
+  # print(obs_index_poses)
   for coordinate in obs_index_poses:
-    print(coordinate)
+    # print(coordinate)
     r = coordinate[0]
     c = coordinate[1]
-    the_map[r][c] = 1
-  print(the_map)
-  
-  
+    the_map[r][c] = map_state.OBS
+  # print(the_map)
+  continue_generating = True
+  r = -1
+  c = -1
+  while (continue_generating):
+    continue_generating = False
+    r = random.randint(0, 29)
+    c = random.randint(0, 63)
+    if the_map[r][c] == map_state.OBS:
+      continue_generating = True
+  return (-(0.15 * r + 0.075), 0.15 * c + 0.075)
 
 if __name__ == '__main__':
-  main()
+  print(get_end_point())
   # listener()
